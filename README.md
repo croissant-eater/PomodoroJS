@@ -10,8 +10,13 @@ A productivity timer combining Pomodoro technique with goal tracking.
 - 25-minute focused work sessions
 - 5-minute breaks
 - Daily progress tracking
-- Cross-platform Excel exports
+- Excel & text file exports
 - System tray controls
+
+
+## Screenshots
+![Screenshot 1](screenshots/screenshot1.png)
+![Screenshot 2](screenshots/screenshot2.png)
 
 ## Installation
 1. Download/clone the project.
