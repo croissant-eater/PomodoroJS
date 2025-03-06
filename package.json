@@ -1,0 +1,19 @@
+{
+  "name": "pomodoro-app",
+  "version": "1.0.0",
+  "dependencies": {
+    "beeminder": "^2.0.1",
+    "chokidar": "^4.0.3",
+    "electron": "^34.3.0",
+    "exceljs": "^4.4.0",
+    "node-pushover": "^1.0.0",
+    "sqlite3": "^5.1.7",
+    "util": "^0.12.5"
+  },
+  "devDependencies": {
+    "electron-builder": "^25.1.8"
+  },
+  "scripts": {
+    "start": "electron main.js"
+  }
+}

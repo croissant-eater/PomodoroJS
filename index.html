@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #2d3748;
+            --primary-color: #4a5568;
+            --accent-color: #4299e1;
+            --success-color: #48bb78;
+            --danger-color: #f56565;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a202c;
+            --text-color: #e2e8f0;
+            --primary-color: #cbd5e0;
+            --accent-color: #63b3ed;
+            --success-color: #68d391;
+            --danger-color: #fc8181;
+            --card-bg: #2d3748;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .container {
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .counter {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            margin-top: 1rem;
+        }
+
+        #sessionCounter {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .export-section {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .export-btn {
+            background: var(--primary-color);
+            font-size: 0.8rem;
+            padding: 6px 12px;
+        }
+
+        #exportStatus {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            min-height: 1.2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .mode-indicator {
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .timer-display {
+            font-size: 3.5rem;
+            font-weight: 600;
+            text-align: center;
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+            color: var(--text-color);
+            margin: 1.5rem 0;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 1.5rem;
+        }
+
+        button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.stop {
+            background: var(--danger-color);
+        }
+
+        button.break {
+            background: var(--success-color);
+        }
+
+        .window-controls {
+            -webkit-app-region: drag;
+            height: 32px;
+            background: var(--card-bg);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+        }
+
+        html, body {
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--bg-color);
+        }
+        
+        body {
+            padding-bottom: 70px; /* Space for theme toggle */
+        }
+
+        /* Adjust container for window controls */
+        .container {
+            margin-top: 40px;
+        }
+
+
+        .mode-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background: var(--accent-color);
+        color: white;
+        font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="window-controls"></div>
+    <div class="container">
+        <div class="card">
+            <div class="mode-indicator">
+                <span class="mode-badge" id="mode">FOCUS</span>
+            </div>
+            <div class="timer-display" id="timer">00:00</div>
+            <div class="controls">
+                <button onclick="ipc.startTimer()">Start</button>
+                <button class="stop" onclick="ipc.stopTimer()">Stop</button>
+                <button class="break" onclick="ipc.startBreak()">Break</button>
+            </div>
+        </div>
+        <div class="counter">
+            Today's Sessions: <span id="sessionCounter">0</span>
+        </div>
+    </div>
+
+    <script>
+        // Theme management
+        let currentTheme = localStorage.getItem('theme') || 'light'
+        document.body.setAttribute('data-theme', currentTheme)
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light'
+            document.body.setAttribute('data-theme', currentTheme)
+            localStorage.setItem('theme', currentTheme)
+        }
+
+        // IPC communication
+        const { ipcRenderer } = require('electron')
+
+        window.minimize = () => ipcRenderer.send('minimize')
+        window.maximize = () => ipcRenderer.send('maximize')
+        window.close = () => ipcRenderer.send('close')
+
+        window.ipc = {
+            startTimer: () => ipcRenderer.send('start-timer'),
+            stopTimer: () => ipcRenderer.send('stop-timer'),
+            startBreak: () => ipcRenderer.send('start-break')
+        }
+
+        ipcRenderer.on('update-counter', (_, count) => {
+            document.getElementById('sessionCounter').textContent = count;
+        });
+
+        /*
+        //DEBUGGING PURPOSES
+        ipcRenderer.invoke('clear-today-sessions').then(message => {
+            console.log(message)
+        })
+        */
+        
+
+        // Initial load
+        ipcRenderer.invoke('get-today-count').then(count => {
+            document.getElementById('sessionCounter').textContent = count;
+        });
+
+        ipcRenderer.on('play-sound', (_, data) => {
+            if (data.type === 'focusEnd') {
+                soundFile = 'sounds/focus-end.mp3'
+            } else if (data.type === 'breakEnd') {
+                soundFile = 'sounds/break-end.mp3'
+            }
+            
+            const sound = new Audio(soundFile)
+            sound.play().catch(err => console.error('Error playing sound:', err))
+        })
+
+        ipcRenderer.on('update-display', (_, data) => {
+            document.getElementById('mode').textContent = data.mode
+            document.getElementById('timer').textContent = data.time
+        })
+
+        async function exportData() {
+            const status = document.getElementById('exportStatus')
+            status.textContent = 'Exporting...'
+            try {
+                const csv = await ipcRenderer.invoke('export-data')
+                const blob = new Blob([csv], { type: 'text/csv' })
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `pomodoro-data-${new Date().toISOString().split('T')[0]}.csv`
+                a.click()
+                status.textContent = 'Export completed!'
+            } catch (err) {
+                status.textContent = `Error: ${err}`
+            }
+        }
+    </script>
+</body>
+</html>
