@@ -1,6 +1,6 @@
 # PomoTimer
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/yourname/pomotimer/ci.yml)](https://github.com/yourname/pomotimer/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/PomodoroJS/pomotimer/ci.yml)](https://github.com/croissant-eater/pomodorojs/actions)
 
 A productivity timer combining Pomodoro technique with goal tracking.
 
