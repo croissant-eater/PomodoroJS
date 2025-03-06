@@ -20,7 +20,7 @@ A lightweight Electron-based Pomodoro timer that helps you track your work sessi
 
 ## Installation
 1. Download/clone the project.
-   - `git clone https://github.com/yourusername/pomodoro-timer.git`
+   - `git clone https://github.com/croissant-eater/PomodoroJS`
    - `cd pomodoro-timer`
 2. Install [Node.js](https://nodejs.org/dist/v22.14.0/node-v22.14.0-x64.msi).
 3. Install Dependencies: 
